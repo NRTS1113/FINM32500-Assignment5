@@ -107,7 +107,7 @@ import pandas as pd
 
 class VolatilityBreakoutStrategy:
     
-    def __init__(self, short=20, long=50):
+    def __init__(self):
         pass
 
     def signals(self, prices: pd.Series) -> pd.Series:
@@ -146,7 +146,7 @@ Write **focused** tests. Keep them deterministic and fast.
 
 ### Required Tests
 
-* **Strategy logic:** shape invariants, first valid signal after long window, correct +1 on golden cross, no false trades on flat series.
+* **Strategy logic:** signal generation of x-day volatility breakout.
 * **Broker behavior:** buy/sell adjusts cash/position correctly, rejects bad inputs, raises on insufficient cash/shares.
 * **Engine loop:** executes trades; final equity matches cash + pos×price.
 * **Edge cases:** empty series, constant price series, NaNs at head, very short series.
