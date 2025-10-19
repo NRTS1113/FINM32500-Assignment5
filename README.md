@@ -65,9 +65,9 @@ A tiny daily backtester with:
 * **Backtester:** runs end-of-day loop: compute signal (t−1), trade at close (t), track cash/position/equity.
 
 > You’ll implement **one simple strategy** (e.g., *VolatilityBreakoutStrategy*).
-> This strategy calculates a rolling x-day standard deviation of returns and buys when 
+> This strategy calculates a rolling x-day standard deviation of returns and buys when
 > the current return is > this x-day figure.
-> 
+>
 > The assignment is graded on **tests + CI**, not alpha.
 
 ---
@@ -147,7 +147,7 @@ import numpy as np
 import pandas as pd
 
 class VolatilityBreakoutStrategy:
-    
+
     def __init__(self):
         pass
 
@@ -315,31 +315,6 @@ Commit the HTML report (optional) or attach screenshots in the README.
 
 ---
 
-## 🏗️ Implementation Details
-
-### Components
-
-#### 1. PriceLoader ([backtester/price_loader.py](backtester/price_loader.py))
-- Generates synthetic price data using geometric random walk
-- Deterministic with seed parameter for reproducible tests
-- Returns pandas Series with business day index
-
-#### 2. VolatilityBreakoutStrategy ([backtester/strategy.py](backtester/strategy.py))
-- Calculates rolling volatility from returns
-- Generates buy signals when price breaks out above upper band (mean + k * std)
-- Supports configurable parameters: lookback period, multiplier (k), hold mode, signal lag, long-only mode
-
-#### 3. Broker ([backtester/broker.py](backtester/broker.py))
-- Executes market orders (buy/sell)
-- Tracks cash, position, and trade log
-- No slippage or transaction costs (simplified for testing)
-- Input validation for quantity and price
-
-#### 4. Backtester Engine ([backtester/engine.py](backtester/engine.py))
-- Runs day-by-day backtest loop
-- Uses previous bar's signal to trade at current bar
-- Tracks equity curve (cash + position value)
-- Returns dict with equity series, signals, and trade history
 
 ### Test Coverage Highlights
 
@@ -369,15 +344,6 @@ Commit the HTML report (optional) or attach screenshots in the README.
 - Date range and business days
 - Determinism with seeds
 - Edge cases: empty ranges, long ranges
-
-### Design Decisions
-
-1. **Minimal Dependencies**: Only pytest, coverage, pandas, and numpy required
-2. **No External Data**: All tests use synthetic generated data
-3. **Deterministic**: Seeded random generators ensure reproducible tests
-4. **Fast Execution**: Full test suite runs in under 1 second
-5. **100% Coverage**: Every line of production code is tested
-6. **Clear Separation**: Each component has single responsibility and well-defined interface
 
 ### CI/CD Pipeline
 
