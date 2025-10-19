@@ -1,7 +1,48 @@
-# Assigment 5: Testing & CI in Financial Engineering
+# Assignment 5: Testing & CI in Financial Engineering
 
 - **Duration:** ~5–6 hours
 - **Focus:** Unit tests, coverage, and CI for a minimal daily-bar backtester (PnL is *not* the goal—engineering discipline is).
+
+## 📊 Implementation Summary
+
+This repository contains a fully tested trading backtester with:
+
+- **100% Code Coverage** - All components have comprehensive test coverage
+- **87 Unit Tests** - Testing strategy logic, broker operations, engine execution, and edge cases
+- **Fast Test Suite** - Completes in ~0.35 seconds (well under the 60-second requirement)
+- **CI/CD Pipeline** - GitHub Actions workflow that enforces 90% coverage threshold
+- **Deterministic Tests** - All tests use seeded synthetic data, no network calls
+
+### Test Coverage Breakdown
+
+| Component | Statements | Coverage |
+|-----------|-----------|----------|
+| backtester/broker.py | 19 | 100% |
+| backtester/engine.py | 28 | 100% |
+| backtester/price_loader.py | 11 | 100% |
+| backtester/strategy.py | 29 | 100% |
+
+### How to Run Tests
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run tests
+pytest -v
+
+# Run tests with coverage
+coverage run -m pytest -q
+coverage report -m
+
+# Generate HTML coverage report
+coverage html
+# Open htmlcov/index.html in browser
+```
 
 ---
 
@@ -238,11 +279,11 @@ Commit the HTML report (optional) or attach screenshots in the README.
 
 ## ✅ Deliverables (Checklist)
 
-* [ ] Code for `PriceLoader`, `Strategy`, `Broker`, `Backtester` (minimal but clean).
-* [ ] `tests/` with comprehensive unit tests and fixtures.
-* [ ] Passing GitHub Actions run (link/screenshot).
-* [ ] Coverage report showing **≥ 90%**.
-* [ ] `README.md` with design notes, how to run tests, CI status, coverage summary.
+* [x] Code for `PriceLoader`, `Strategy`, `Broker`, `Backtester` (minimal but clean).
+* [x] `tests/` with comprehensive unit tests and fixtures.
+* [x] Coverage report showing **≥ 90%** (achieved 100%).
+* [x] `README.md` with design notes, how to run tests, CI status, coverage summary.
+* [ ] Passing GitHub Actions run (pending push to GitHub).
 
 ---
 
@@ -271,3 +312,79 @@ Commit the HTML report (optional) or attach screenshots in the README.
 * Real data is allowed, but **all tests must run offline** using generated or cached data (prefer generated to keep CI fast).
 * Keep strategies simple; **depth of testing > strategy creativity.**
 * Commit early; use PRs to watch CI feedback like a real quant workflow.
+
+---
+
+## 🏗️ Implementation Details
+
+### Components
+
+#### 1. PriceLoader ([backtester/price_loader.py](backtester/price_loader.py))
+- Generates synthetic price data using geometric random walk
+- Deterministic with seed parameter for reproducible tests
+- Returns pandas Series with business day index
+
+#### 2. VolatilityBreakoutStrategy ([backtester/strategy.py](backtester/strategy.py))
+- Calculates rolling volatility from returns
+- Generates buy signals when price breaks out above upper band (mean + k * std)
+- Supports configurable parameters: lookback period, multiplier (k), hold mode, signal lag, long-only mode
+
+#### 3. Broker ([backtester/broker.py](backtester/broker.py))
+- Executes market orders (buy/sell)
+- Tracks cash, position, and trade log
+- No slippage or transaction costs (simplified for testing)
+- Input validation for quantity and price
+
+#### 4. Backtester Engine ([backtester/engine.py](backtester/engine.py))
+- Runs day-by-day backtest loop
+- Uses previous bar's signal to trade at current bar
+- Tracks equity curve (cash + position value)
+- Returns dict with equity series, signals, and trade history
+
+### Test Coverage Highlights
+
+**Strategy Tests (29 tests):**
+- Signal length and type validation
+- Edge cases: empty series, constant prices, very short series, NaN handling
+- Parameter variations: lookback, k multiplier, hold mode, lag, long-only vs long-short
+- Determinism and reproducibility
+
+**Broker Tests (24 tests):**
+- Buy/sell operations and cash/position updates
+- Input validation (zero/negative quantities and prices)
+- Edge cases: short selling, negative cash, fractional prices
+- Trade log integrity
+- Total portfolio value calculations
+
+**Engine Tests (24 tests):**
+- Integration with strategy and broker
+- Signal-to-trade logic (using t-1 signal)
+- Equity tracking and position management
+- Edge cases: empty prices, single bar, insufficient cash
+- Mock testing for failure scenarios
+- Deterministic results verification
+
+**PriceLoader Tests (10 tests):**
+- Series generation and indexing
+- Date range and business days
+- Determinism with seeds
+- Edge cases: empty ranges, long ranges
+
+### Design Decisions
+
+1. **Minimal Dependencies**: Only pytest, coverage, pandas, and numpy required
+2. **No External Data**: All tests use synthetic generated data
+3. **Deterministic**: Seeded random generators ensure reproducible tests
+4. **Fast Execution**: Full test suite runs in under 1 second
+5. **100% Coverage**: Every line of production code is tested
+6. **Clear Separation**: Each component has single responsibility and well-defined interface
+
+### CI/CD Pipeline
+
+The GitHub Actions workflow ([.github/workflows/ci.yml](.github/workflows/ci.yml)):
+1. Checks out code
+2. Sets up Python 3.11
+3. Installs dependencies
+4. Runs tests with coverage
+5. Enforces 90% coverage threshold (currently at 100%)
+6. Fails the build if coverage drops below 90%

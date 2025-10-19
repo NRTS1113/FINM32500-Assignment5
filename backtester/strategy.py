@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from price_loader import PriceLoader
 
 
 class VolatilityBreakoutStrategy:
